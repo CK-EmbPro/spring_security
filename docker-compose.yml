@@ -1,0 +1,45 @@
+services:
+  db:
+    container_name: db
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=springsec
+
+    volumes:
+      - postgres_data:/app/postgres/data
+    ports:
+      - 5432:5432
+    networks:
+      - spring-sec-network
+
+
+  springsec:
+    container_name: springsec_con
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: springsecimg:latest
+    ports:
+      - 8080:8080
+    networks:
+      - spring-sec-network
+    depends_on:
+      - db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/springsec
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=1234
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+
+networks:
+  spring-sec-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
